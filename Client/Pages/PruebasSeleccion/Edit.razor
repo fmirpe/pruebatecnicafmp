@@ -1,0 +1,29 @@
+﻿@page "/editar-pruebasseleccion/{IdPrueba:long}"
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.WebAssembly.Authentication
+@using PruebaIngresoFMP.Shared
+@attribute [Authorize]
+@inject HttpClient Http
+@inject NavigationManager NavigationManager
+@inject AuthenticationStateProvider GetAuthenticationStateAsync
+<h3>Editar Prueba Seleccion</h3>
+<FormularioPruebasSeleccion OnValidSubmit="@Editar" Data="@prueba" />
+@code {
+    [Parameter] public long IdPrueba { get; set; }
+    PruebasSeleccion prueba = new PruebasSeleccion();
+
+    protected override async Task OnParametersSetAsync()
+    {
+        string requestUri = $"api/pruebasseleccion/{IdPrueba}";
+        prueba = await Http.GetFromJsonAsync<PruebasSeleccion>(requestUri);
+    }
+
+    async Task Editar()
+    {
+        var name = GetAuthenticationStateAsync.GetAuthenticationStateAsync().Result.User.Identity.Name;
+        prueba.Usuario = name;
+        prueba.Fechaactualizacion = DateTime.Now;
+        await Http.PutAsJsonAsync($"api/pruebasseleccion/{IdPrueba}", prueba);
+        NavigationManager.NavigateTo("indice-pruebasseleccion");
+    }
+}

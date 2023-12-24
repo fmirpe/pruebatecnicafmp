@@ -1,0 +1,56 @@
+﻿
+<EditForm Model="@Data" OnValidSubmit="@OnValidSubmit">
+    <div class="form-field">
+        <label>Identificacion</label>
+        <div>
+            <InputNumber @bind-Value="@Data.Identificacion" />
+            <ValidationMessage For="@(() => Data.Identificacion)" />
+        </div>
+    </div>
+    <div class="form-field">
+        <label>Nombres</label>
+        <div>
+            <InputText @bind-Value="@Data.Nombres" />
+            <ValidationMessage For="@(() => Data.Nombres)" />
+        </div>
+    </div>
+    <div class="form-field">
+        <label>Apellidos</label>
+        <div>
+            <InputText @bind-Value="@Data.Apellidos" />
+            <ValidationMessage For="@(() => Data.Apellidos)" />
+        </div>
+    </div>
+    <div class="form-field">
+        <label>Direccion</label>
+        <div>
+            <InputText @bind-Value="@Data.Direccion" />
+        </div>
+    </div>
+    <div class="form-field">
+        <label>Telefono</label>
+        <div>
+            <InputText @bind-Value="@Data.Telefono" />
+        </div>
+    </div>
+    <div class="form-field">
+        <label>Email</label>
+        <div>
+            <InputText @bind-Value="@Data.Email" />
+            <ValidationMessage For="@(() => Data.Email)" />
+        </div>
+    </div>
+
+    <button type="submit" class="btn btn-success mt-3">Aceptar</button>
+    <DataAnnotationsValidator />
+</EditForm>
+
+@code {
+    [Parameter] public Aspirantes Data { get; set; } = new Aspirantes();
+    [Parameter] public EventCallback OnValidSubmit { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        Data.Fechaactualizacion = DateTime.Now;
+    }
+}

@@ -1,0 +1,21 @@
+﻿@page "/crear-pruebasseleccion"
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.WebAssembly.Authentication
+@using PruebaIngresoFMP.Shared
+@attribute [Authorize]
+@inject HttpClient Http
+@inject NavigationManager NavigationManager
+
+<h3>Agregar Pruebas Seleccion</h3>
+
+<FormularioPruebasSeleccion OnValidSubmit="@Crear" Data="@prueba" />
+
+@code {
+    PruebasSeleccion prueba = new PruebasSeleccion();
+
+    async Task Crear()
+    {
+        await Http.PostAsJsonAsync("api/pruebasseleccion", prueba);
+        NavigationManager.NavigateTo("indice-pruebasseleccion");
+    }
+}

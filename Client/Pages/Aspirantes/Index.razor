@@ -1,0 +1,101 @@
+﻿@page "/indice-aspirantes"
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.WebAssembly.Authentication
+@using PruebaIngresoFMP.Shared
+@using System.Text.Json
+@attribute [Authorize]
+@inject HttpClient Http
+@inject IJSRuntime JS
+
+<h3>Aspirantes</h3>
+
+<div>
+    <a class="btn btn-success" href="crear-aspirante">Agregar</a>
+</div>
+
+@if(aspirantes == null)
+{
+    <p><em>Loading...</em></p>
+} else if(aspirantes.Count() == 0)
+{
+    <text>No hay registros</text>
+} else
+{
+    <div class="table-responsive">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Id</th>
+                    <th>Identificacion</th>
+                    <th>Nombres</th>
+                    <th>Apellidos</th>
+                    <th>Email</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var aspirante in aspirantes)
+                {
+                    <tr>
+                        <td>@aspirante.Id</td>
+                        <td>@aspirante.Identificacion</td>
+                        <td>@aspirante.Nombres</td>
+                        <td>@aspirante.Apellidos</td>
+                        <td>@aspirante.Email</td>
+                        <td>
+                            <a class="btn btn-success" href="editar-aspirante/@aspirante.Id">Editar</a>
+                            <button class="btn btn-danger" @onclick="(() => deleteAspirantes(aspirante.Id))">Borrar</button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+        <Paginacion PaginasTotales="paginasTotales" PaginaActual="paginaActual" Radio="2"
+                    PaginaSeleccionada="PaginaSeleccionada"></Paginacion>
+    </div>
+    
+}
+
+@code {
+    List<Aspirantes> aspirantes { get; set; }
+
+    private int paginaActual = 1;
+    private int paginasTotales;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await loadAspirantes();
+    }
+
+    async Task loadAspirantes(int pagina = 1, int cantidadRegistroMostrar = 10)
+    {
+        var httpResponse = await Http.GetAsync($"api/aspirantes?pagina={pagina}&CantidadMostrar={cantidadRegistroMostrar}");
+        if (httpResponse.IsSuccessStatusCode)
+        {
+            paginasTotales = int.Parse(httpResponse.Headers.GetValues("totalPaginas").FirstOrDefault());
+            var responseString = await httpResponse.Content.ReadAsStringAsync();
+            aspirantes = JsonSerializer.Deserialize<List<Aspirantes>>(responseString,
+                new JsonSerializerOptions() { PropertyNameCaseInsensitive = true });
+        }
+        else
+        {
+            Console.WriteLine("error");
+        }
+    }
+
+    private async Task PaginaSeleccionada(int pagina)
+    {
+        paginaActual = pagina;
+        await loadAspirantes(pagina);
+    }
+
+    async Task deleteAspirantes(long id)
+    {
+        var mensaje = $"Seguro de borrar registro?";
+        if(await JS.InvokeAsync<bool>("confirm", mensaje))
+        {
+            await Http.DeleteAsync($"api/aspirantes/{id}");
+            await loadAspirantes();
+        }
+    }
+}

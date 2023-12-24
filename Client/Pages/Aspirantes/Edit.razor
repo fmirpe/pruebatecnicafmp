@@ -1,0 +1,32 @@
+﻿@page "/editar-aspirante/{IdAspirante:long}"
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.WebAssembly.Authentication
+@using PruebaIngresoFMP.Shared
+@attribute [Authorize]
+@inject HttpClient Http
+@inject NavigationManager NavigationManager
+@inject AuthenticationStateProvider GetAuthenticationStateAsync
+
+<h3>Editar Aspirante</h3>
+<FormularioAspirante OnValidSubmit="@EditarAspirante" Data="@aspirante" />
+
+@code {
+    [Parameter] public long IdAspirante { get; set; }
+    Aspirantes aspirante = new Aspirantes();
+
+    protected override async Task OnParametersSetAsync()
+    {
+        string requestUri = $"api/aspirantes/{IdAspirante}";
+        aspirante = await Http.GetFromJsonAsync<Aspirantes>(requestUri);
+    }
+
+    async Task EditarAspirante()
+    {
+        var name = GetAuthenticationStateAsync.GetAuthenticationStateAsync().Result.User.Identity.Name;
+        aspirante.Usuario = name;
+        aspirante.Fechaactualizacion = DateTime.Now;
+        await Http.PutAsJsonAsync($"api/aspirantes/{IdAspirante}", aspirante);
+        NavigationManager.NavigateTo("indice-aspirantes");
+    }
+
+}

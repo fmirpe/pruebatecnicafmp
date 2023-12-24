@@ -1,0 +1,117 @@
+﻿@inject HttpClient http
+
+<EditForm Model="@Data" OnValidSubmit="@OnValidSubmit">
+    <div class="form-field">
+        <label>Aspirante</label>
+        <div>
+            <InputSelect class="form-select" @bind-Value="Data.AspiranteId">
+                @if (Data.Aspirante == null)
+                {
+                    <option selected value="">None</option>
+                }
+                @foreach (var item in Aspirantes)
+                {
+                    if(Data.AspiranteId == item.Id)
+                    {
+                        <option selected value="@item.Id">@item.Nombres @item.Apellidos</option>
+                    } else
+                    {
+                        <option value="@item.Id">@item.Nombres @item.Apellidos</option>
+                        
+                    }
+                }
+            </InputSelect>
+            <ValidationMessage For="@(() => Data.AspiranteId)" />
+        </div>
+    </div>
+    <div class="form-field">
+        <label>Prueba</label>
+        <div>
+            <InputSelect class="form-select" @bind-Value="Data.PruebasId">
+                @if (Data.Pruebas == null)
+                {
+                    <option selected value="">None</option>
+                }
+                @foreach (var item in Pruebas)
+                {
+                    if (Data.AspiranteId == item.Id)
+                    {
+                        <option selected value="@item.Id">@item.Nombre</option>
+                    }
+                    else
+                    {
+                        <option value="@item.Id">@item.Nombre</option>
+
+                    }
+                }
+            </InputSelect>
+            <ValidationMessage For="@(() => Data.PruebasId)" />
+        </div>
+    </div>
+
+    <div class="form-field">
+        <label>Fecha inicio</label>
+        <div>
+            <InputDate @bind-Value="@Data.Fechainicio" />
+            <ValidationMessage For="@(() => Data.Fechainicio)" />
+        </div>
+    </div>
+    <div class="form-field">
+        <label>Fecha final</label>
+        <div>
+            <InputDate @bind-Value="@Data.Fechafinalizacion" />
+            <ValidationMessage For="@(() => Data.Fechafinalizacion)" />
+        </div>
+    </div>
+
+    <div class="form-field">
+        <label>Estado</label>
+        <div>
+            <InputSelect class="form-select" @bind-Value="Data.EstadospruebasId">
+                @if (Data.EstadosPruebas == null)
+                {
+                    <option selected value="">None</option>
+                }
+                @foreach (var item in EstadosPruebas)
+                {
+                    if (Data.AspiranteId == item.Id)
+                    {
+                        <option selected value="@item.Id">@item.Descripcion</option>
+                    }
+                    else
+                    {
+                        <option value="@item.Id">@item.Descripcion</option>
+
+                    }
+                }
+            </InputSelect>
+            <ValidationMessage For="@(() => Data.EstadospruebasId)" />
+        </div>
+    </div>
+    <div class="form-field">
+        <label>Calificación</label>
+        <div>
+            <InputNumber @bind-Value="@Data.Calificacion" />
+            <ValidationMessage For="@(() => Data.Calificacion)" />
+        </div>
+    </div>
+
+    <button type="submit" class="btn btn-success mt-3">Aceptar</button>
+    <DataAnnotationsValidator />
+</EditForm>
+
+@code {
+    [Parameter] public PruebasSeleccion Data { get; set; } = new PruebasSeleccion();
+    [Parameter] public EventCallback OnValidSubmit { get; set; }
+    List<Aspirantes> Aspirantes = new List<Aspirantes>();
+    List<Pruebas> Pruebas = new List<Pruebas>();
+    List<EstadosPrueba> EstadosPruebas = new List<EstadosPrueba>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        Aspirantes = await http.GetFromJsonAsync<List<Aspirantes>>("api/aspirantes/getall");
+        Pruebas = await http.GetFromJsonAsync<List<Pruebas>>("api/pruebas");
+        EstadosPruebas = await http.GetFromJsonAsync<List<EstadosPrueba>>("api/estadosprueba");
+
+    }
+}

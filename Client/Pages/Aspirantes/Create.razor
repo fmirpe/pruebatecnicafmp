@@ -1,0 +1,21 @@
+﻿@page "/crear-aspirante"
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.WebAssembly.Authentication
+@using PruebaIngresoFMP.Shared
+@attribute [Authorize]
+@inject HttpClient Http
+@inject NavigationManager NavigationManager
+
+<h3>Agregar Aspirante</h3>
+
+<FormularioAspirante OnValidSubmit="@CrearAspirante" Data="@aspirante" />
+
+@code {
+    Aspirantes aspirante = new Aspirantes();
+
+    async Task CrearAspirante()
+    {
+        await Http.PostAsJsonAsync("api/aspirantes", aspirante);
+        NavigationManager.NavigateTo("indice-aspirantes");
+    }
+}

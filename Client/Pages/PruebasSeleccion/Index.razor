@@ -1,0 +1,129 @@
+﻿@page "/indice-pruebasseleccion"
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.WebAssembly.Authentication
+@using PruebaIngresoFMP.Client.Helpers
+@using PruebaIngresoFMP.Shared
+@using System.Text.Json
+@using CsvHelper
+@using System.IO
+@using System.Globalization
+
+@attribute [Authorize]
+@inject HttpClient Http
+@inject IJSRuntime JS
+<h3>Pruebas Seleccion</h3>
+
+<div>
+    <a class="btn btn-success" href="crear-pruebasseleccion">Agregar</a>
+</div>
+
+@if (pruebas == null)
+{
+    <p><em>Loading...</em></p>
+}
+else if (pruebas.Count() == 0)
+{
+    <text>No hay registros</text>
+}
+else
+{
+    <button class="mb-4 btn btn-info" @onclick="ExportarCSV">Exportar a CSV</button>
+    <div class="table-responsive">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Id</th>
+                    <th>Aspirante</th>
+                    <th>Prueba</th>
+                    <th>Inicio</th>
+                    <th>Fin</th>
+                    <th>Estado</th>
+                    <th>Calificacion</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var prueba in pruebas)
+                {
+                    <tr>
+                        <td>@prueba.Id</td>
+                        <td>@prueba.Aspirante.Nombres @prueba.Aspirante.Apellidos</td>
+                        <td>@prueba.Pruebas.Nombre</td>
+                        <td>@prueba.Fechainicio</td>
+                        <td>@prueba.Fechafinalizacion</td>
+                        <td>@prueba.EstadosPruebas.Descripcion</td>
+                        <td>@prueba.Calificacion</td>
+                        <td>
+                            <a class="btn btn-success" href="editar-pruebasseleccion/@prueba.Id">Editar</a>
+                            <button class="btn btn-danger" @onclick="(() => delete(prueba.Id))">Borrar</button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+        <Paginacion PaginasTotales="paginasTotales" PaginaActual="paginaActual" Radio="2"
+                    PaginaSeleccionada="PaginaSeleccionada"></Paginacion>
+    </div>
+
+}
+
+@code {
+    List<PruebasSeleccion> pruebas { get; set; }
+
+    private int paginaActual = 1;
+    private int paginasTotales;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await load();
+    }
+
+    async Task load(int pagina = 1, int cantidadRegistroMostrar = 10)
+    {
+        var httpResponse = await Http.GetAsync($"api/pruebasseleccion?pagina={pagina}&CantidadMostrar={cantidadRegistroMostrar}");
+        if (httpResponse.IsSuccessStatusCode)
+        {
+            paginasTotales = int.Parse(httpResponse.Headers.GetValues("totalPaginas").FirstOrDefault());
+            var responseString = await httpResponse.Content.ReadAsStringAsync();
+            pruebas = JsonSerializer.Deserialize<List<PruebasSeleccion>>(responseString,
+                new JsonSerializerOptions() { PropertyNameCaseInsensitive = true });
+        }
+        else
+        {
+            Console.WriteLine("error");
+        }
+    }
+
+    private async Task PaginaSeleccionada(int pagina)
+    {
+        paginaActual = pagina;
+        await load(pagina);
+    }
+
+    async Task delete(long id)
+    {
+        var mensaje = $"Seguro de borrar registro?";
+        if (await JS.InvokeAsync<bool>("confirm", mensaje))
+        {
+            await Http.DeleteAsync($"api/pruebasseleccion/{id}");
+            await load();
+        }
+    }
+
+    private void ExportarCSV()
+    {
+        using (var memoryStream = new MemoryStream())
+        {
+            using (var writer = new StreamWriter(memoryStream))
+            {
+                using (var csv = new CsvWriter(writer, CultureInfo.InvariantCulture))
+                {
+                    csv.WriteRecords(pruebas);
+                }
+
+                var arr = memoryStream.ToArray();
+                JS.GuardarComo("pruebasseleccion.csv", arr);
+            }
+        }
+    }
+}
