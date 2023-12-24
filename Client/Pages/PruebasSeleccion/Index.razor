@@ -80,7 +80,7 @@ else
 
     async Task load(int pagina = 1, int cantidadRegistroMostrar = 10)
     {
-        var httpResponse = await Http.GetAsync($"api/pruebasseleccion?pagina={pagina}&CantidadMostrar={cantidadRegistroMostrar}");
+        var httpResponse = await Http.GetAsync($"api/pruebasseleccion/GetAllPag?pagina={pagina}&CantidadMostrar={cantidadRegistroMostrar}");
         if (httpResponse.IsSuccessStatusCode)
         {
             paginasTotales = int.Parse(httpResponse.Headers.GetValues("totalPaginas").FirstOrDefault());

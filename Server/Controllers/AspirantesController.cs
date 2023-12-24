@@ -49,7 +49,7 @@ namespace PruebaIngresoFMP.Server.Controllers
             return NoContent();
         }
 
-        [HttpGet]
+        [HttpGet("Get")]
         public async Task<ActionResult<List<Aspirantes>>> Get([FromQuery] Paginacion paginacion)
         {
             var queryble = _db.Aspirantes.AsQueryable();
@@ -57,8 +57,7 @@ namespace PruebaIngresoFMP.Server.Controllers
             return await queryble.Paginar(paginacion).ToListAsync();
         }
 
-        [HttpGet(Name = "GetAll")]
-        [Route("[action]")]
+        [HttpGet("GetAll")]
         public async Task<ActionResult<List<Aspirantes>>> GetAll()
         {
             return await _db.Aspirantes.ToListAsync();

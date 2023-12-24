@@ -49,7 +49,7 @@ namespace PruebaIngresoFMP.Server.Controllers
             return NoContent();
         }
 
-        [HttpGet(Name = "GetAllPag")]
+        [HttpGet("GetAllPag")]
         public async Task<ActionResult<List<PruebasSeleccion>>> Get([FromQuery] Paginacion paginacion)
         {
             var queryble = _db.PruebasSeleccions

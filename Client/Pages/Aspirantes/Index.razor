@@ -69,7 +69,7 @@
 
     async Task loadAspirantes(int pagina = 1, int cantidadRegistroMostrar = 10)
     {
-        var httpResponse = await Http.GetAsync($"api/aspirantes?pagina={pagina}&CantidadMostrar={cantidadRegistroMostrar}");
+        var httpResponse = await Http.GetAsync($"api/aspirantes/get?pagina={pagina}&CantidadMostrar={cantidadRegistroMostrar}");
         if (httpResponse.IsSuccessStatusCode)
         {
             paginasTotales = int.Parse(httpResponse.Headers.GetValues("totalPaginas").FirstOrDefault());
